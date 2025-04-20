@@ -25,6 +25,8 @@
             border-radius: 8px;
             font-size: 14px;
             z-index: 100;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         #title {
             font-size: 18px;
@@ -52,6 +54,7 @@
         .control-row {
             display: flex;
             align-items: center;
+            margin-bottom: 5px;
         }
         input[type="range"] {
             flex: 1;
@@ -95,6 +98,55 @@
             height: 15px;
             border-radius: 50%;
         }
+        .collapsible-header {
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            padding: 5px 0;
+        }
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .collapsible-content.expanded {
+            max-height: 500px;
+        }
+        #ray-details {
+            background-color: rgba(30,30,50,0.7);
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        .tab-group {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 5px;
+            background: rgba(40, 40, 80, 0.5);
+            cursor: pointer;
+        }
+        .tab.active {
+            background: #2a3a8c;
+        }
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+        }
+        input[type="color"] {
+            border: none;
+            width: 30px;
+            height: 20px;
+            background: none;
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
@@ -105,27 +157,78 @@
         </div>
         
         <div class="control-group">
-            <div class="control-label">Refraction Index</div>
-            <div class="control-row">
-                <input type="range" id="refractionIndex" min="1" max="2.5" step="0.01" value="1.5">
-                <span id="refractionValue" class="value-display">1.5</span>
+            <div class="collapsible-header">
+                <span>Material Properties</span>
+                <span class="toggle">▼</span>
             </div>
-            <div class="examples">Examples: Air (1.0), Water (1.33), Glass (1.5), Diamond (2.4)</div>
-        </div>
-        
-        <div class="control-group">
-            <div class="control-label">Light Rays</div>
-            <div class="control-row">
-                <input type="range" id="rayCount" min="5" max="50" step="1" value="15">
-                <span id="rayCountValue" class="value-display">15</span>
+            <div class="collapsible-content expanded">
+                <div class="control-label">Refraction Index</div>
+                <div class="control-row">
+                    <input type="range" id="refractionIndex" min="1" max="2.5" step="0.01" value="1.5">
+                    <span id="refractionValue" class="value-display">1.5</span>
+                </div>
+                <div class="examples">Examples: Air (1.0), Water (1.33), Glass (1.5), Diamond (2.4)</div>
             </div>
         </div>
         
         <div class="control-group">
-            <div class="control-label">Window Angle</div>
-            <div class="control-row">
-                <input type="range" id="windowAngle" min="0" max="75" step="1" value="0">
-                <span id="windowAngleValue" class="value-display">0°</span>
+            <div class="collapsible-header">
+                <span>Light Source</span>
+                <span class="toggle">▼</span>
+            </div>
+            <div class="collapsible-content expanded">
+                <div class="control-label">Position</div>
+                <div class="control-row">
+                    <label>X:</label>
+                    <input type="range" id="lightX" min="-10" max="10" step="0.1" value="-5">
+                    <span id="lightXValue" class="value-display">-5.0</span>
+                </div>
+                <div class="control-row">
+                    <label>Y:</label>
+                    <input type="range" id="lightY" min="0.2" max="5" step="0.1" value="1.5">
+                    <span id="lightYValue" class="value-display">1.5</span>
+                </div>
+                <div class="control-row">
+                    <label>Z:</label>
+                    <input type="range" id="lightZ" min="-5" max="5" step="0.1" value="0">
+                    <span id="lightZValue" class="value-display">0.0</span>
+                </div>
+                
+                <div class="control-label">Properties</div>
+                <div class="control-row">
+                    <label>Intensity:</label>
+                    <input type="range" id="lightIntensity" min="0.1" max="3" step="0.1" value="1.5">
+                    <span id="lightIntensityValue" class="value-display">1.5</span>
+                </div>
+                <div class="control-row color-picker-wrapper">
+                    <label>Color:</label>
+                    <input type="color" id="lightColor" value="#ffff99">
+                    <span id="lightColorValue">#ffff99</span>
+                </div>
+                
+                <div class="control-label">Ray Count</div>
+                <div class="control-row">
+                    <input type="range" id="rayCount" min="5" max="50" step="1" value="15">
+                    <span id="rayCountValue" class="value-display">15</span>
+                </div>
+                
+                <div class="control-row">
+                    <label><input type="checkbox" id="showRayAngles"> Show Detailed Ray Info</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <div class="collapsible-header">
+                <span>Window Properties</span>
+                <span class="toggle">▼</span>
+            </div>
+            <div class="collapsible-content expanded">
+                <div class="control-label">Window Angle</div>
+                <div class="control-row">
+                    <input type="range" id="windowAngle" min="0" max="75" step="1" value="0">
+                    <span id="windowAngleValue" class="value-display">0°</span>
+                </div>
             </div>
         </div>
 
@@ -145,6 +248,22 @@
                 <span>Refracted Ray</span>
             </div>
         </div>
+        
+        <div id="ray-details-container" style="display: none;">
+            <div class="control-group">
+                <div class="collapsible-header">
+                    <span>Ray Details</span>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="collapsible-content expanded">
+                    <div class="tab-group">
+                        <div class="tab active" data-tab="general">General</div>
+                        <div class="tab" data-tab="calculations">Calculations</div>
+                    </div>
+                    <div id="ray-details">Select a ray or hover over one to see details</div>
+                </div>
+            </div>
+        </div>
     </div>
     <script type="importmap">
     {
@@ -158,4 +277,3 @@
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4c6229722a6346bc8eb5cb0e5eae5d41","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
-
