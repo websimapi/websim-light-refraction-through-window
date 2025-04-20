@@ -26,6 +26,15 @@ let refractionIndex = 1.5;
 let rayCount = 20;
 let windowAngle = 0;
 
+// CSG operations for creating the window frame
+// Defining CSG before it's used in initScene
+const CSG = {
+    subtract: function(geometry1, geometry2) {
+        // For simplicity, we'll just create a frame manually
+        return new THREE.BoxGeometry(4.4, 4.4, 0.3).toNonIndexed();
+    }
+};
+
 // Initialize ray lines and window
 initScene();
 updateRays();
@@ -83,18 +92,8 @@ function initScene() {
     window3D = new THREE.Mesh(windowGeometry, windowMaterial);
     scene.add(window3D);
 
-    // Add window frame
-    const frameGeometry = new THREE.BoxGeometry(4.4, 4.4, 0.3);
-    const holeMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 });
-    const frameMesh = new THREE.Mesh(frameGeometry, holeMaterial);
-    
-    // Create hole in frame
-    const windowHole = new THREE.BoxGeometry(4, 4, 0.5);
-    const holeMesh = new THREE.Mesh(windowHole);
-    holeMesh.updateMatrix();
-    frameMesh.geometry = CSG.subtract(frameMesh.geometry, holeMesh.geometry);
-    
-    scene.add(frameMesh);
+    // Create window frame (using a more direct approach instead of CSG)
+    createWindowFrame();
 
     // Create light source
     const sourceGeometry = new THREE.SphereGeometry(0.2, 16, 16);
@@ -112,6 +111,53 @@ function initScene() {
     gridHelper.rotation.x = Math.PI / 2;
     gridHelper.position.z = -3;
     scene.add(gridHelper);
+}
+
+// Create a window frame without using CSG
+function createWindowFrame() {
+    const frameMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 });
+    const frameGroup = new THREE.Group();
+    
+    // Frame parts dimensions
+    const frameThickness = 0.3;
+    const frameWidth = 0.4;
+    const windowSize = 4;
+    const outerSize = windowSize + (frameWidth * 2);
+    
+    // Top
+    const topFrame = new THREE.Mesh(
+        new THREE.BoxGeometry(outerSize, frameWidth, frameThickness),
+        frameMaterial
+    );
+    topFrame.position.y = (windowSize / 2) + (frameWidth / 2);
+    frameGroup.add(topFrame);
+    
+    // Bottom
+    const bottomFrame = new THREE.Mesh(
+        new THREE.BoxGeometry(outerSize, frameWidth, frameThickness),
+        frameMaterial
+    );
+    bottomFrame.position.y = -(windowSize / 2) - (frameWidth / 2);
+    frameGroup.add(bottomFrame);
+    
+    // Left
+    const leftFrame = new THREE.Mesh(
+        new THREE.BoxGeometry(frameWidth, outerSize, frameThickness),
+        frameMaterial
+    );
+    leftFrame.position.x = -(windowSize / 2) - (frameWidth / 2);
+    frameGroup.add(leftFrame);
+    
+    // Right
+    const rightFrame = new THREE.Mesh(
+        new THREE.BoxGeometry(frameWidth, outerSize, frameThickness),
+        frameMaterial
+    );
+    rightFrame.position.x = (windowSize / 2) + (frameWidth / 2);
+    frameGroup.add(rightFrame);
+    
+    scene.add(frameGroup);
+    return frameGroup;
 }
 
 function updateRays() {
@@ -214,16 +260,6 @@ function refract(incident, normal, n1, n2) {
     return incidentCopy.multiplyScalar(n).add(normalCopy.multiplyScalar(n * cosI - cosT));
 }
 
-// CSG operations for creating the window frame
-const CSG = {
-    subtract: function(geometry1, geometry2) {
-        // Simple implementation for demonstration
-        // In a real application, you would use a CSG library
-        // This is a simplified approach that creates a frame-like effect
-        return new THREE.BoxGeometry(4.4, 4.4, 0.3).toNonIndexed();
-    }
-};
-
 // Animation loop
 function animate() {
     requestAnimationFrame(animate);
@@ -232,4 +268,3 @@ function animate() {
 }
 
 animate();
-
