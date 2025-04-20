@@ -3,63 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Light Refraction Through Window</title>
+    <title>Light Refraction Simulation</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
             font-family: Arial, sans-serif;
+            background-color: #111;
+            color: white;
         }
         canvas {
             display: block;
         }
-        #info {
+        #info-panel {
             position: absolute;
             top: 10px;
-            left: 10px;
-            color: white;
-            background-color: rgba(0,0,0,0.5);
-            padding: 10px;
-            border-radius: 5px;
+            right: 10px;
+            width: 300px;
+            background-color: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 8px;
             font-size: 14px;
-            pointer-events: none;
+            z-index: 100;
         }
-        #controls {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
+        #title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        #description {
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        .control-group {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        .control-group:last-child {
+            border-bottom: none;
+        }
+        .control-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .control-row {
+            display: flex;
+            align-items: center;
+        }
+        input[type="range"] {
+            flex: 1;
+            margin-right: 10px;
+        }
+        .value-display {
+            min-width: 40px;
+            text-align: right;
+        }
+        .preset-buttons {
+            display: flex;
+            gap: 5px;
+            margin-top: 15px;
+        }
+        .preset-button {
+            flex: 1;
+            background: #2a3a8c;
+            border: none;
             color: white;
-            background-color: rgba(0,0,0,0.5);
-            padding: 10px;
-            border-radius: 5px;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
         }
-        #controls input {
-            width: 100px;
-            margin-left: 10px;
+        .preset-button:hover {
+            background: #3a4acc;
         }
-        label {
-            margin-right: 20px;
+        #legend {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
         }
     </style>
 </head>
 <body>
-    <div id="info">Light Refraction Simulation</div>
-    <div id="controls">
-        <label>
-            Refraction Index:
-            <input type="range" id="refractionIndex" min="1" max="2.5" step="0.01" value="1.5">
-            <span id="refractionValue">1.5</span>
-        </label>
-        <label>
-            Light Rays:
-            <input type="range" id="rayCount" min="5" max="50" step="1" value="20">
-            <span id="rayCountValue">20</span>
-        </label>
-        <label>
-            Window Angle:
-            <input type="range" id="windowAngle" min="0" max="90" step="1" value="0">
-            <span id="windowAngleValue">0°</span>
-        </label>
+    <div id="info-panel">
+        <div id="title">Light Refraction Simulation</div>
+        <div id="description">
+            This simulation demonstrates how light rays refract when passing through a glass window. Refraction occurs when light changes speed as it moves from one medium to another.
+        </div>
+        
+        <div class="control-group">
+            <div class="control-label">Refraction Index</div>
+            <div class="control-row">
+                <input type="range" id="refractionIndex" min="1" max="2.5" step="0.01" value="1.5">
+                <span id="refractionValue" class="value-display">1.5</span>
+            </div>
+            <div class="examples">Examples: Air (1.0), Water (1.33), Glass (1.5), Diamond (2.4)</div>
+        </div>
+        
+        <div class="control-group">
+            <div class="control-label">Light Rays</div>
+            <div class="control-row">
+                <input type="range" id="rayCount" min="5" max="50" step="1" value="15">
+                <span id="rayCountValue" class="value-display">15</span>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <div class="control-label">Window Angle</div>
+            <div class="control-row">
+                <input type="range" id="windowAngle" min="0" max="75" step="1" value="0">
+                <span id="windowAngleValue" class="value-display">0°</span>
+            </div>
+        </div>
+
+        <div class="preset-buttons">
+            <button class="preset-button" id="preset-normal">Normal Glass</button>
+            <button class="preset-button" id="preset-water">Water</button>
+            <button class="preset-button" id="preset-diamond">Diamond</button>
+        </div>
+        
+        <div id="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #ffff00;"></div>
+                <span>Incident Ray</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #00ffff;"></div>
+                <span>Refracted Ray</span>
+            </div>
+        </div>
     </div>
     <script type="importmap">
     {
