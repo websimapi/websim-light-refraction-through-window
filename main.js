@@ -106,23 +106,31 @@ function initScene() {
     const ambientLight = new THREE.AmbientLight(0x505050);
     scene.add(ambientLight);
 
-    // Add directional light (main light)
-    const mainLight = new THREE.DirectionalLight(0xffffff, 0.7);
-    mainLight.position.set(5, 8, 5);
-    mainLight.castShadow = true;
-    mainLight.shadow.mapSize.width = 1024;
-    mainLight.shadow.mapSize.height = 1024;
-    mainLight.shadow.camera.near = 0.5;
-    mainLight.shadow.camera.far = 30;
-    mainLight.shadow.camera.left = -10;
-    mainLight.shadow.camera.right = 10;
-    mainLight.shadow.camera.top = 10;
-    mainLight.shadow.camera.bottom = -10;
-    scene.add(mainLight);
+    // Create light source (visualization and actual light source combined)
+    const sourceGeometry = new THREE.SphereGeometry(0.2, 16, 16);
+    const sourceMaterial = new THREE.MeshBasicMaterial({ 
+        color: 0xffff00,
+        emissive: 0xffff00,
+        emissiveIntensity: 1.5
+    });
+    lightSource = new THREE.Mesh(sourceGeometry, sourceMaterial);
+    lightSource.position.set(-5, 1.5, 0);
+    scene.add(lightSource);
     
-    // Additional fill light
-    const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
-    fillLight.position.set(-5, 3, -5);
+    // Add point light at source - this will be our main shadow-casting light
+    const pointLight = new THREE.PointLight(0xffff99, 1.5, 20);
+    pointLight.position.copy(lightSource.position);
+    pointLight.castShadow = true;
+    pointLight.shadow.mapSize.width = 1024;
+    pointLight.shadow.mapSize.height = 1024;
+    pointLight.shadow.camera.near = 0.1;
+    pointLight.shadow.camera.far = 25;
+    pointLight.shadow.bias = -0.001;
+    scene.add(pointLight);
+    
+    // Secondary fill light - reduced intensity and no shadows
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.2);
+    fillLight.position.set(3, 5, 3);
     scene.add(fillLight);
 
     // Create window (glass pane)
@@ -146,23 +154,7 @@ function initScene() {
 
     // Create window frame
     createWindowFrame();
-
-    // Create light source (better visualization)
-    const sourceGeometry = new THREE.SphereGeometry(0.2, 16, 16);
-    const sourceMaterial = new THREE.MeshBasicMaterial({ 
-        color: 0xffff00,
-        emissive: 0xffff00,
-        emissiveIntensity: 1.5
-    });
-    lightSource = new THREE.Mesh(sourceGeometry, sourceMaterial);
-    lightSource.position.set(-5, 1.5, 0);
-    scene.add(lightSource);
     
-    // Add point light at source
-    const pointLight = new THREE.PointLight(0xffff99, 1, 10);
-    pointLight.position.copy(lightSource.position);
-    scene.add(pointLight);
-
     // Create group for rays
     rayGroup = new THREE.Group();
     scene.add(rayGroup);
@@ -464,10 +456,31 @@ function refract(incident, normal, n1, n2) {
     return incidentCopy.multiplyScalar(n).add(normalCopy.multiplyScalar(n * cosI - cosT));
 }
 
-// Animation loop
+// Animation loop with optional light movement for more dynamic effect
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
+    
+    // Optional: Add subtle movement to the light source for more dynamic shadows
+    // Uncomment if you want the light to gently move
+    /*
+    const time = Date.now() * 0.001;
+    lightSource.position.x = -5 + Math.sin(time * 0.5) * 0.3;
+    lightSource.position.y = 1.5 + Math.sin(time * 0.3) * 0.2;
+    
+    // Update the point light position to match
+    scene.children.forEach(child => {
+        if (child instanceof THREE.PointLight) {
+            child.position.copy(lightSource.position);
+        }
+    });
+    
+    // Update rays when light moves
+    if (Math.floor(time * 5) % 5 === 0) {
+        updateRays();
+    }
+    */
+    
     renderer.render(scene, camera);
 }
 
